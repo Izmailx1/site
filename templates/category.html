@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{ category }} - Категории</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Светлый фон */
+        }
+        .card {
+            margin-bottom: 20px; /* Отступ для карточек товара */
+        }
+        .card img {
+            max-height: 200px;
+            object-fit: cover;
+        }
+        .card-body p {
+            color: #6c757d;
+        }
+        .card-title {
+            color: #343a40;
+            min-height: 60px; /* Фиксированная высота для названия товара */
+        }
+        .navbar {
+            margin-bottom: 30px; /* Отступ для навигационной панели */
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- Ссылки на навигационную панель, как в вашем исходном примере -->
+</nav>
+
+<div class="container">
+    <h1 class="mb-4">Категория: {{ category }}</h1>
+    <div class="row">
+        {% for product_id, product in products.items() %}
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card">
+                <!-- Используем класс img-fluid, который делает изображение масштабируемым по ширине карточки -->
+                <img src="{{ product.image }}" alt="{{ product.name }}" class="card-img-top img-fluid">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+                    <div class="buy-details">
+                        <span class="price">Цена: {{ product.price }} руб.</span>
+                        <a href="{{ url_for('add_to_cart', product_id=product_id) }}" class="btn btn-primary btn-sm">Добавить в корзину</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

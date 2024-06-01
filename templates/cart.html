@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Ваша корзина</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+       @media (max-width: 576px) {
+       .cart-card {
+           padding: 10px;
+       }
+       .cart-item {
+           flex-direction: column;
+           align-items: center;
+       }
+       .cart-item .col-sm-2, .cart-item .col-sm-4 {
+           /* Сделать все колонки на всю ширину на маленьких экранах */
+           flex: 0 0 100%;
+           max-width: 100%;
+           text-align: center;
+           margin-bottom: 10px;
+       }
+       .input-group {
+           width: 50%;
+       }
+       }
+        body {
+            background-color: #ffffff; /* Бледно-желтый фон */
+        }
+        .cart-card {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ECECEC;
+            border-radius: 10px;
+        }
+        .cart-item {
+            margin-bottom: 10px;
+        }
+        .navbar {
+            margin-bottom: 30px;
+        }
+        .quantity-text {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="{{ url_for('index') }}">Магазин</a>
+    <div class="collapse navbar-collapse">
+        <div class="navbar-nav">
+            <a class="nav-link" href="{{ url_for('cart') }}">
+                Корзина <span id="cart-total" class="badge badge-pill badge-info"></span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="cart-card">
+    <h1 class="mb-4">Корзина</h1>
+    {% if cart_products %}
+        {% for product_id, quantity in cart_items.items() %}
+            {% set product_sum = products[product_id].price * quantity %}
+            <div class="container">
+                <div class="cart-card">
+                    <div class="row cart-item justify-content-center" id="product-card-{{ product_id }}">
+                        <div class="col-sm-2">
+                            <img src="{{ products[product_id].image }}" alt="{{ products[product_id].name}}" width="100">
+                        </div>
+                        <div class="col-sm-12 text-center">
+                            <h4>{{ products[product_id].name }}</h4>
+                            <p>{{ products[product_id].description }}</p>
+                        </div>
+                        <div class="col-sm-12 text-center">
+                            <p><strong>Цена:</strong> {{ products[product_id].price }} руб.</p>
+                        </div>
+                        <div class="col-sm-12 d-flex flex-column align-items-center">
+                            <div><strong>Количество:</strong></div>
+                            <div>
+                              <button onclick="updateCartItem({{ product_id }}, 'remove')" class="btn btn-outline-secondary btn-sm">-</button>
+                              <span id="quantity-{{ product_id }}" class="mx-2">{{ cart_items[product_id] }}</span>
+                              <button onclick="updateCartItem({{ product_id }}, 'add')" class="btn btn-outline-secondary btn-sm">+</button>
+                            </div>
+                            <div>
+                              <button onclick="updateCartItem({{ product_id }}, 'delete')" class="btn btn-danger btn-sm mt-2">Удалить все</button>
+                            </div>
+                            <div class="row justify-content-center">
+                                <span id="total-{{ product_id }}" class="quantity-text">Сумма: {{ product_sum }} руб.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    {% endfor %}
+</div>
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h4>Общая стоимость:</h4>
+        <h4 id="total_price">{{ total_sum }} руб.</h4>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-3">
+    <div class="col-12 col-md-8 d-flex flex-column flex-sm-row justify-content-center">
+        <a href="{{ url_for('checkout') }}" class="btn btn-success mb-2 mb-sm-3 ">Оформить заказ</a>
+    {% else %}
+        <p>Корзина пуста</p>
+    {% endif %}
+        <div class="w-100 d-block d-sm-none my-2"></div>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary mb-3 ml-md-2">Вернуться на главную страницу</a>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    function updateCartItem(product_id, action) {
+        console.log("Добавление в корзину товара"); // До
+        fetch(`/update_cart/${product_id}/${action}`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (action === 'delete') {
+                    // Удаляем карточку товара из DOM
+                    var productCard = document.getElementById(`product-card-${product_id}`);
+                    if (productCard) {
+                        productCard.remove();
+                    }
+                } else {
+                    // Обновление общей стоимости и количества товаров на странице
+                    // Это может включать в себя обновление текста элементов и/или их показ/скрытие
+                    // Ожидается, что вы добавили в свой HTML соответствующие элементы для количества и стоимости
+                    document.getElementById(`quantity-${product_id}`).textContent = data.quantity;
+                    document.getElementById('total_price').textContent = data.cart_total;
+                    let quantityElement = document.getElementById(`total-${product_id}`).textContent = 'Сумма: ' + data.total_price;
+                    quantityElement.textContent = data.quantity;
+                    quantityElement.style.fontWeight = "bold";
+                }
+                document.getElementById('total_price').textContent = data.cart_total;
+            } else {
+                // Обработка ошибки
+                console.error('Ошибка при обновлении корзины:', data.message);
+            }
+        })
+        .catch(error => console.error('Ошибка AJAX:', error));
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Интернет магазин</title>
+
+    <!-- Bootstrap CSS (Убедитесь, что используете актуальную версию Bootstrap) -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        .product-card {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ECECEC;
+            border-radius: 10px;
+            transition: box-shadow 0.2s;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+
+        .product-image {
+            width: 300px;
+            max-height: 300px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 576px) { /* Для экранов меньше 576px */
+        .product-image {
+           width: 50%; /* Уменьшаем ширину изображения до 75% от ширины контейнера */
+        }
+        }
+        .navbar {
+            margin-bottom: 30px;
+        }
+
+        .cart-link {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="{{ url_for('index') }}">Магазин</a>
+    <div class="navbar-nav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('cart') }}">
+                    Корзина <span id="cart-total" class="badge badge-pill badge-info">{{ cart_total }}</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container my-3">
+    <div class="btn-group" role="group" aria-label="Категории">
+        <button type="button" class="btn btn-info category-btn" data-category="all">Все</button>
+        <button type="button" class="btn btn-outline-info category-btn" data-category="berries">Ягоды</button>
+        <button type="button" class="btn btn-outline-info category-btn" data-category="vegetables">Овощи</button>
+        <button type="button" class="btn btn-outline-info category-btn" data-category="fruits">Фрукты</button>
+    </div>
+</div>
+
+<div class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <div id="products-container" class="row">
+        {% for product_id, product in products.items() %}
+        <div class="col-12 col-md-4  col-sm-6 product-card" data-category="{{ product.category }}">
+            <img src="{{ product.image }}" alt="{{ product.name }}" width="300" class="img-fluid product-image">
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description }}</p>
+            <p><strong>Цена:</strong> {{ product.price }} руб.</p>
+            <a href="{{ url_for('product', product_id=product_id) }}" class="btn btn-primary">Подробнее</a>
+            <button onclick="addToCart({{ product_id }})" class="btn btn-primary">Добавить в корзину</button>
+<!--            <a href="{{ url_for('add_to_cart', product_id=product_id) }}" class="btn btn-success">Добавить в корзину</a>-->
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // Как только контент загружен
+    document.addEventListener('DOMContentLoaded', function () {
+        // Для каждой кнопки категории добавляем обработчик события на клик
+        document.querySelectorAll('.category-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var category = this.getAttribute('data-category');
+
+                // Обновляем стиль кнопок
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.add('btn-outline-info');
+                    btn.classList.remove('btn-info');
+                });
+                this.classList.add('btn-info');
+                this.classList.remove('btn-outline-info');
+
+                // Фильтруем товары
+                const allProducts = document.querySelectorAll('.product-card');
+                allProducts.forEach(function(card) {
+                    if (category === 'all' || card.getAttribute('data-category') === category) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Прокрутка страницы вверх, чтобы товары отображались с начала контейнера
+                window.scrollTo(0, 0);
+            });
+        });
+    });
+</script>
+<script>
+    // Функция для добавления товара в корзину
+    function addToCart(product_id) {
+        console.log("Добавление в корзину товара с ID:", product_id); // До
+        fetch('/add_to_cart/' + product_id, {
+            method: 'POST',
+        }).then(response => response.json())
+          .then(data => {
+              console.log("Ответ сервера:", data); // После
+              document.getElementById('cart-total').textContent = data.cart_total;
+          })
+          .catch(error => console.error('Ошибка:', error));
+    }
+</script>
+</body>
+</html>

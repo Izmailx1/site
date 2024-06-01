@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Оформление заказа</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .item-card {
+            margin-bottom: 5px;
+            padding: 5px;
+            border: 1px solid #ECECEC;
+            border-radius: 10px;
+        }
+        .sub-btn{
+            margin-bottom: 70px;
+            margin-right: 15px;
+        }
+        .sub-btn1{
+            margin-bottom: 20px;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="container mt-3">
+    <h4>Товары в заказе:</h4>
+<!--        <div class="d-flex flex-row flex-nowrap">-->
+<!--            <div class="p-2">Наименование</div>-->
+<!--            <div class="p-2">Кол-во</div>-->
+<!--            <div class="p-2">Цена</div>-->
+<!--            <div class="p-2">Сумма</div>-->
+<!--        </div>-->
+    {% for item in checkout_items["items"] %}
+        <div class="item-card d-flex flex-row flex-nowrap">
+            <div class="p-2">{{ item.name }}</div>
+            <div class="p-2">{{ item.quantity }} шт.</div>
+            <div class="p-2">{{ item.unit_price }} руб.</div>
+            <div class="p-2">{{ item.total_price }} руб.</div>
+        </div>
+    {% endfor %}
+    <div class="row">
+        <div class="col-md-12">
+            <strong>Итого: {{ checkout_items.total }} руб.</strong>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <h2>Оформление заказа</h2>
+    <form action="{{ url_for('place_order') }}" method="POST">
+        <div class="form-group">
+            <label for="fullName">Имя и Фамилия</label>
+            <input name="fullName" type="text" class="form-control" id="fullName" required>
+        </div>
+
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">+7</span>
+          </div>
+          <input name="phone" type="tel" class="form-control" placeholder="Номер тел. в формате 9371234567" pattern="\d{10}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="address">Адрес доставки</label>
+            <input name="address" type="text" class="form-control" id="address" required>
+        </div>
+
+        <div class="form-group">
+            <label for="deliveryTime">Промежуток времени</label>
+            <select name="deliveryTime" class="form-control" id="deliveryTime" required>
+                <option>с 9:00 до 12:00</option>
+                <option>с 12:00 до 15:00</option>
+                <option>с 15:00 до 19:00</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="deliveryDate">Дата доставки</label>
+            <select name="deliveryDate" class="form-control" id="deliveryDate" required>
+                <option value="Сегодня">Сегодня {{ dates[0] }}</option>
+                <option value="Завтра">Завтра {{ dates[1] }}</option>
+                <option value="Послезавтра">Послезавтра {{ dates[2] }}</option>
+            </select>
+        </div>
+        <div class="text-center">
+            <button type="submit" class="sub-btn1 btn btn-primary">Оформить заказ</button>
+        </div>
+        <div class="text-center">
+             <a href="{{ url_for('index') }}" class="btn btn-secondary sub-btn">На главную</a>
+             <a href="{{ url_for('cart') }}" class="btn btn-secondary sub-btn">В корзину</a>
+        </div>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
